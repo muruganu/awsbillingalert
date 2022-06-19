@@ -6,37 +6,42 @@ provider "aws" {
 data "aws_caller_identity" "current" {}
 data "aws_availability_zones" "available" { state = "available" }
 
-/*
+
 ##remote backend configuration
 terraform {
   required_providers {
     aws = {
       source  = "registry.terraform.io/hashicorp/aws"
-      version = "~> 4.18.0"
+      version = "~> 4.19.0"
     }
   }
   backend "s3" {
-    bucket         = "aws_s3_bucket.tfstatefilestore.name"
+    bucket         = "aws-budget-tfstatefilestore-731685434595"
     key            = "terraform.tfstate"
-    dynamodb_table = "aws_dynamodb_table.tfstatefilestore.name"
+    dynamodb_table = "aws-budget-tfstatefilestorelock"
   }
 }
-*/
+
 #remote backend s3 storage
 resource "aws_s3_bucket" "tfstatefilestore" {
-  bucket = "tfstatefilestore"
+  bucket = "${var.appname}-tfstatefilestore-${data.aws_caller_identity.current.account_id}"
   lifecycle {
     prevent_destroy = true
   }
   tags = {
-    Name        = "terraform_back"
-    Environment = "Test"
+    Name        = "${var.appname}-tfstatefilestore-${data.aws_caller_identity.current.account_id}"
+    Environment = "${var.envname}"
   }
 }
 
+module "tfstatefilestore" {
+  source = "./module/s3policy"
+  bucket = aws_s3_bucket.tfstatefilestore.id
+}
+
 #remote backend state lock dynamodb table
-resource "aws_dynamodb_table" "tfstatefilestore" {
-  name = "tfstatefilestore"
+resource "aws_dynamodb_table" "tfstatefilestorelock" {
+  name = "${var.appname}-tfstatefilestorelock"
   hash_key = "LockID"
   read_capacity = 5
   write_capacity = 5

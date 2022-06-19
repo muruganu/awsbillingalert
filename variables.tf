@@ -1,4 +1,9 @@
 variable "appname" {
-  default = %{ basename(abspath(path.root))
+  default = "aws-budget"
+  type    = string
+}
+
+variable "envname" {
+  default = "test"
   type    = string
 }
