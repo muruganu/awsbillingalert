@@ -16,7 +16,7 @@ terraform {
     }
   }
   backend "s3" {
-    bucket         = "aws-budget-tfstatefilestore-731685434595"
+    bucket         = "aws-budget-tfstatefilestore-288866261642"
     key            = "terraform.tfstate"
     dynamodb_table = "aws-budget-tfstatefilestorelock"
   }
